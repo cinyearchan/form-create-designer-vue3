@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
-    "commit": "git cz ",
+    "cz": "git cz ",
     "lint": "eslint . --ext .vue,.js,.ts,.jsx,.tsx --fix",
     "format": "prettier --write ./**/*.{vue,ts,tsx,js,jsx,css,less,scss,json,md}",
     "prepare": "husky install"
@@ -30,11 +30,17 @@
     ]
   },
   "dependencies": {
-    "vue": "^3.2.37"
+    "@element-plus/icons-vue": "^2.0.9",
+    "@form-create/element-ui": "^2.5.25",
+    "codemirror": "^6.0.1",
+    "element-plus": "^2.2.13",
+    "vue": "^3.2.37",
+    "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.0.3",
     "@commitlint/config-conventional": "^17.0.3",
+    "@types/codemirror": "^5.60.5",
     "@typescript-eslint/eslint-plugin": "^5.33.0",
     "@typescript-eslint/parser": "^5.33.0",
     "@vitejs/plugin-vue": "^3.0.2",
