@@ -27,6 +27,7 @@ module.exports = {
   rules: {
     'object-curly-spacing': 'off',
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    '@typescript-eslint/no-unused-vars': 'warn',
     'vue/multi-word-component-names': [
       'error',
       {
