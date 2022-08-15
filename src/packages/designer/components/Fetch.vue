@@ -89,7 +89,7 @@ export default defineComponent({
           field: 'parse',
           title: '结果解析函数',
           value: (res, rule, fapi) =>
-            res.rows.map(item => {
+            res.rows.map((item: any) => {
               return { label: item.name, value: item.adcode }
             }),
           props: {

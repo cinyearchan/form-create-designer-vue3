@@ -54,7 +54,7 @@ let cid = 1
 export default defineComponent({
   name: 'DragTool',
   props: ['dragBtn', 'children', 'unique', 'formCreateInject'],
-  emits: ['active'],
+  emits: ['active', 'addComponent', 'copy', 'addChild', 'delete'],
   setup(props, { emit }) {
     const { unique } = toRefs(props),
       id = ref(unique.value || cid++),

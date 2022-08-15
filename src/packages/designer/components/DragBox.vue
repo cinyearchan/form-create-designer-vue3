@@ -17,7 +17,7 @@ export default defineComponent({
 
     return () =>
       h(draggable, ruleProps.value, {
-        item: ({ element, index }) => {
+        item: ({ element, index }: { element: any; index: number }) => {
           return h(
             'div',
             {
