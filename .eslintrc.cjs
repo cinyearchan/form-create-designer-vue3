@@ -27,6 +27,12 @@ module.exports = {
   rules: {
     'object-curly-spacing': 'off',
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    'vue/multi-word-component-names': [
+      'error',
+      {
+        ignores: ['index']
+      }
+    ],
     'prettier/prettier': 'error'
   }
 }

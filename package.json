@@ -30,7 +30,7 @@
     ]
   },
   "dependencies": {
-    "@element-plus/icons-vue": "^2.0.9",
+    "@element-plus/icons": "^0.0.11",
     "@form-create/element-ui": "^2.5.25",
     "codemirror": "^6.0.1",
     "element-plus": "^2.2.13",
