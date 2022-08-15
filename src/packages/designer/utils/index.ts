@@ -26,7 +26,7 @@ interface IRule {
   style?: string
 }
 
-export function makeOptionsRule(to: string, flag: boolean) {
+export function makeOptionsRule(to: string, flag?: boolean) {
   const options = [
     { label: 'JSON数据', value: 0 },
     { label: '接口数据', value: 1 }
