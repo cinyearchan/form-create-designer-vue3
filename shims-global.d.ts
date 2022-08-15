@@ -1,1 +1,6 @@
 declare module '@form-create/utils/lib/type.js'
+declare module 'codemirror/lib/codemirror.js'
+declare module '@form-create/utils/lib/deepextend.js'
+declare module '@form-create/utils/lib/unique.js'
+declare module '@form-create/utils/lib/tocase.js'
+declare module '@form-create/utils/lib/json.js'
