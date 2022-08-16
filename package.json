@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@element-plus/icons": "^0.0.11",
-    "@form-create/element-ui": "^2.5.25",
+    "@form-create/element-ui": "^3.1.5",
     "codemirror": "^5.65.7",
     "element-plus": "^2.2.13",
     "vue": "^3.2.37",
