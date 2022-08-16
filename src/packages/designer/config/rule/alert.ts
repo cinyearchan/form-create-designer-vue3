@@ -1,11 +1,30 @@
 const label = '提示'
 const name = 'el-alert'
 
+export interface IAlertRule {
+  type: string
+  props: {
+    title: string
+    description: string
+    type: string
+    effect: string
+  }
+  children: unknown[]
+}
+
+export interface IAlertProps {
+  type: string
+  field: string
+  title: string
+  value?: boolean
+  options?: Array<{ label: string; value: any }>
+}
+
 export default {
   icon: 'icon-alert',
   label,
   name,
-  rule() {
+  rule(): IAlertRule {
     return {
       type: name,
       props: {
@@ -17,7 +36,7 @@ export default {
       children: []
     }
   },
-  props() {
+  props(): Array<IAlertProps> {
     return [
       { type: 'input', field: 'title', title: '标题' },
       {
