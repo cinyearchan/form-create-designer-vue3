@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts">
-import formCreate from '@form-create/element-ui'
+import formCreate, { Options } from '@form-create/element-ui'
 import { defineComponent, toRefs, ref, watch } from 'vue'
 
 interface IOption {

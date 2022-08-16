@@ -161,15 +161,15 @@ import {
   provide,
   nextTick,
   onMounted,
-  computed,
-  inject
+  computed
+  // inject
 } from 'vue'
 import form from '../config/base/form'
 import configForm from '../config/base/form'
 import field from '../config/base/field'
 import validate from '../config/base/validate'
 import { deepCopy } from '@form-create/utils/lib/deepextend.js'
-import is, { hasProperty } from '@form-create/utils/lib/type.js'
+import is from '@form-create/utils/lib/type.js' // hasProperty
 import { lower } from '@form-create/utils/lib/tocase.js'
 import ruleList from '../config/rule'
 import createMenu from '../config/menu'
@@ -180,6 +180,9 @@ import uniqueId from '@form-create/utils/lib/unique.js'
 import * as CodeMirror from 'codemirror/lib/codemirror.js'
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/mode/javascript/javascript.js'
+
+import { IOn } from '../types/index'
+import { Api, Rule, Options } from '@form-create/element-ui'
 
 export default defineComponent({
   name: 'FcDesigner',
@@ -237,7 +240,7 @@ export default defineComponent({
             labelPosition: 'top'
           },
           submitBtn: false,
-          mounted: fapi => {
+          mounted: (fapi: Api) => {
             fapi.activeRule = activeRule.value
           }
         }
@@ -251,7 +254,7 @@ export default defineComponent({
             labelPosition: 'top'
           },
           submitBtn: false,
-          mounted: fapi => {
+          mounted: (fapi: Api) => {
             fapi.activeRule = activeRule.value
           }
         }
@@ -267,7 +270,7 @@ export default defineComponent({
           },
           row: { type: undefined },
           submitBtn: false,
-          mounted: fapi => {
+          mounted: (fapi: Api) => {
             fapi.activeRule = activeRule.value
           }
         }
@@ -292,216 +295,177 @@ export default defineComponent({
         }
       })
 
-    const getParent = rule => {
-        let parent = rule.__fc__.parent.rule
-        const config = parent.config
-        if (config && config.config.inside) {
-          rule = parent
-          parent = parent.__fc__.parent.rule
-        }
-        return { root: parent, parent: rule }
-      },
-      makeDrag = (group, tag, children, on) => {
-        return {
-          type: 'DragBox',
-          wrap: {
-            show: false
+    const getParent = (rule: Rule) => {
+      let parent = rule.__fc__.parent.rule
+      const config = parent.config
+      if (config && config.config.inside) {
+        rule = parent
+        parent = parent.__fc__.parent.rule
+      }
+      return { root: parent, parent: rule }
+    }
+    const makeDrag = (
+      group: boolean,
+      tag: string,
+      children: unknown[],
+      on: IOn
+    ) => {
+      return {
+        type: 'DragBox',
+        wrap: {
+          show: false
+        },
+        col: {
+          show: false
+        },
+        inject: true,
+        props: {
+          rule: {
+            props: {
+              group: group === true ? 'default' : group,
+              ghostClass: 'ghost',
+              animation: 150,
+              handle: '._fc-drag-btn',
+              emptyInsertThreshold: 0,
+              direction: 'vertical',
+              itemKey: 'type',
+              modelValue: children
+            }
           },
-          col: {
-            show: false
-          },
-          inject: true,
-          props: {
-            rule: {
-              props: {
-                group: group === true ? 'default' : group,
-                ghostClass: 'ghost',
-                animation: 150,
-                handle: '._fc-drag-btn',
-                emptyInsertThreshold: 0,
-                direction: 'vertical',
-                itemKey: 'type',
-                modelValue: children
-              }
-            },
-            tag
-          },
-          children,
-          on
-        }
-      },
-      makeDragRule = children => {
-        return [
-          makeDrag(true, 'draggable', children, {
-            add: (inject, evt) => dragAdd(children, evt),
-            end: (inject, evt) => dragEnd(children, evt),
-            start: (inject, evt) => dragStart(children, evt),
-            unchoose: (inject, evt) => dragUnchoose(children, evt)
-          })
-        ]
-      },
-      dragAdd = (children, evt) => {
-        const newIndex = evt.newIndex
-        const menu = evt.item._underlying_vm_
-        if (menu && menu.name) {
-          const rule = makeRule(ruleList[menu.name])
-          children.splice(newIndex, 0, rule)
-        } else {
-          if (addRule.value) {
-            const rule = addRule.value.children.splice(
-              addRule.value.oldIndex,
-              1
-            )
-            children.splice(newIndex, 0, rule[0])
-          }
-        }
-        added.value = true
-      },
-      dragEnd = (children, { newIndex, oldIndex }) => {
-        if (
-          !added.value &&
-          !(moveRule.value === children && newIndex === oldIndex)
-        ) {
-          const rule = moveRule.value.splice(oldIndex, 1)
+          tag
+        },
+        children,
+        on
+      }
+    }
+    const makeDragRule = (children: unknown[]) => {
+      return [
+        makeDrag(true, 'draggable', children, {
+          add: (inject, evt) => dragAdd(children, evt),
+          end: (inject, evt) => dragEnd(children, evt),
+          start: (inject, evt) => dragStart(children, evt),
+          unchoose: (inject, evt) => dragUnchoose(children, evt)
+        })
+      ]
+    }
+    const dragAdd = (children: unknown[], evt: any) => {
+      debugger
+      console.log('add evt', evt)
+      console.log('children', children)
+      const newIndex = evt.newIndex
+      const menu = evt.item._underlying_vm_
+      if (menu && menu.name) {
+        const rule = makeRule(ruleList[menu.name])
+        children.splice(newIndex, 0, rule)
+      } else {
+        if (addRule.value) {
+          const rule = addRule.value.children.splice(addRule.value.oldIndex, 1)
           children.splice(newIndex, 0, rule[0])
         }
-        moveRule.value = null
-        addRule.value = null
-        added.value = false
-      },
-      dragStart = (children, evt) => {
-        moveRule.value = children
-        added.value = false
-      },
-      dragUnchoose = (children, evt) => {
-        addRule.value = {
-          children,
-          oldIndex: evt.oldIndex
-        }
-      },
-      toolActive = rule => {
-        nextTick(() => {
-          activeTab.value = 'props'
-        })
+      }
+      added.value = true
+    }
+    const dragEnd = (
+      children: unknown[],
+      { newIndex, oldIndex }: { newIndex: number; oldIndex: number }
+    ) => {
+      console.log('end', newIndex, oldIndex)
+      if (
+        !added.value &&
+        !(moveRule.value === children && newIndex === oldIndex)
+      ) {
+        const rule = moveRule.value.splice(oldIndex, 1)
+        children.splice(newIndex, 0, rule[0])
+      }
+      moveRule.value = null
+      addRule.value = null
+      added.value = false
+    }
+    const dragStart = (children: unknown[], evt: any) => {
+      moveRule.value = children
+      added.value = false
+    }
+    const dragUnchoose = (children: unknown[], evt: any) => {
+      addRule.value = {
+        children,
+        oldIndex: evt.oldIndex
+      }
+    }
+    const toolActive = (rule: Rule) => {
+      nextTick(() => {
+        activeTab.value = 'props'
+      })
 
-        activeRule.value = rule
-        if (propsFormMap.value[rule.field]) {
+      activeRule.value = rule
+      if (rule.field !== null || rule.field !== undefined) {
+        if (rule.field && propsFormMap.value[rule.field]) {
           propsForm.value.rule = propsFormMap.value[rule.field]
         } else {
           propsForm.value.rule = rule.config.config.props()
           propsFormMap.value[rule.field] = propsForm.value.rule
         }
+      }
 
-        const formData = { ...rule.props, formCreateChild: rule.children[0] }
-        Object.keys(rule).forEach(k => {
-          if (['effect', 'config', 'payload', 'id', 'type'].indexOf(k) < 0)
-            formData['formCreate' + upper(k)] = rule[k]
-        })
-        ;['props', 'effect'].forEach(name => {
-          rule[name] &&
-            Object.keys(rule[name]).forEach(k => {
-              formData['formCreate' + upper(name) + '>' + k] = rule[name][k]
-            })
-        })
-
-        propsForm.value.value = deepCopy(formData)
-        showBaseRule.value = !!rule.field
-
-        if (showBaseRule.value) {
-          baseForm.value.value = {
-            field: rule.field,
-            title: rule.title,
-            info: rule.info,
-            _control: rule._control
-          }
-
-          validateForm.value.value = {
-            validate: rule.validate ? [...rule.validate] : []
-          }
-        }
-      },
-      makeRule = (config, _rule?) => {
-        const rule = _rule || config.rule()
-        rule.config = { config }
-        if (!rule.effect) rule.effect = {}
-        rule.effect._fc = true
-        rule._fc_drag_tag = config.name
-
-        let drag
-
-        if (config.drag) {
-          const children = []
-          drag = makeDrag(config.drag, rule.type, children, {
-            end: (inject, evt) => dragEnd(inject.self.children, evt),
-            add: (inject, evt) => dragAdd(inject.self.children, evt),
-            start: (inject, evt) => dragStart(inject.self.children, evt),
-            unchoose: (inject, evt) => dragUnchoose(inject.self.children, evt)
+      const formData = {
+        ...rule.props,
+        formCreateChild:
+          rule.children && rule.children.length > 0 ? rule.children[0] : []
+      }
+      Object.keys(rule).forEach(k => {
+        if (['effect', 'config', 'payload', 'id', 'type'].indexOf(k) < 0)
+          formData['formCreate' + upper(k)] = rule[k]
+      })
+      ;['props', 'effect'].forEach(name => {
+        rule[name] &&
+          Object.keys(rule[name]).forEach(k => {
+            formData['formCreate' + upper(name) + '>' + k] = rule[name][k]
           })
-          rule.children.push(drag)
+      })
+
+      propsForm.value.value = deepCopy(formData)
+      showBaseRule.value = !!rule.field
+
+      if (showBaseRule.value) {
+        baseForm.value.value = {
+          field: rule.field,
+          title: rule.title,
+          info: rule.info,
+          _control: rule._control
         }
 
-        if (config.children && !_rule) {
-          const child = makeRule(ruleList[config.children], null)
-          ;(drag || rule).children.push(child)
+        validateForm.value.value = {
+          validate: rule.validate ? [...rule.validate] : []
         }
+      }
+    }
+    const makeRule = (config, _rule?: Rule | null) => {
+      const rule = _rule || config.rule()
+      rule.config = { config }
+      if (!rule.effect) rule.effect = {}
+      rule.effect._fc = true
+      rule._fc_drag_tag = config.name
 
-        if (config.inside) {
-          rule.children = [
-            {
-              type: 'DragTool',
-              props: {
-                dragBtn: config.dragBtn !== false,
-                children: config.children
-              },
-              effect: {
-                _fc_tool: true
-              },
-              inject: true,
-              on: {
-                delete: ({ self }) => {
-                  getParent(self).parent.__fc__.rm()
-                  clearActiveRule()
-                },
-                addComponent: ({ self }) => {
-                  const top = getParent(self)
-                  top.root.children.splice(
-                    top.root.children.indexOf(top.parent) + 1,
-                    0,
-                    makeRule(top.parent.config.config)
-                  )
-                },
-                addChild: ({ self }) => {
-                  const top = getParent(self)
-                  const config = top.parent.config.config
-                  const item = ruleList[config.children]
-                  if (!item) return
-                  ;(!config.drag
-                    ? top.parent
-                    : top.parent.children[0]
-                  ).children[0].children.push(makeRule(item))
-                },
-                copy: ({ self }) => {
-                  const top = getParent(self),
-                    copyRule = formCreate.copyRule(top.parent)
-                  if (copyRule.slot) {
-                    copyRule.slot = `slot-${uniqueId()}`
-                  }
-                  top.root.children.splice(
-                    top.root.children.indexOf(top.parent) + 1,
-                    0,
-                    copyRule
-                  )
-                },
-                active: ({ self }) => {
-                  toolActive(getParent(self).parent)
-                }
-              },
-              children: rule.children
-            }
-          ]
-          return rule
-        } else {
-          return {
+      let drag
+
+      if (config.drag) {
+        const children: unknown[] = []
+        drag = makeDrag(config.drag, rule.type, children, {
+          end: (inject, evt) => dragEnd(inject.self.children, evt),
+          add: (inject, evt) => dragAdd(inject.self.children, evt),
+          start: (inject, evt) => dragStart(inject.self.children, evt),
+          unchoose: (inject, evt) => dragUnchoose(inject.self.children, evt)
+        })
+        rule.children.push(drag)
+      }
+
+      if (config.children && !_rule) {
+        const child = makeRule(ruleList[config.children], null)
+        ;(drag || rule).children.push(child)
+      }
+
+      if (config.inside) {
+        rule.children = [
+          {
             type: 'DragTool',
             props: {
               dragBtn: config.dragBtn !== false,
@@ -511,10 +475,9 @@ export default defineComponent({
               _fc_tool: true
             },
             inject: true,
-            slot: `slot-${rule.field ? rule.field : uniqueId()}`,
             on: {
               delete: ({ self }) => {
-                self.__fc__.rm()
+                getParent(self).parent.__fc__.rm()
                 clearActiveRule()
               },
               addComponent: ({ self }) => {
@@ -522,16 +485,17 @@ export default defineComponent({
                 top.root.children.splice(
                   top.root.children.indexOf(top.parent) + 1,
                   0,
-                  makeRule(self.children[0].config.config)
+                  makeRule(top.parent.config.config)
                 )
               },
               addChild: ({ self }) => {
-                const config = self.children[0].config.config
+                const top = getParent(self)
+                const config = top.parent.config.config
                 const item = ruleList[config.children]
                 if (!item) return
                 ;(!config.drag
-                  ? self
-                  : self.children[0]
+                  ? top.parent
+                  : top.parent.children[0]
                 ).children[0].children.push(makeRule(item))
               },
               copy: ({ self }) => {
@@ -547,270 +511,324 @@ export default defineComponent({
                 )
               },
               active: ({ self }) => {
-                toolActive(self.children[0])
+                toolActive(getParent(self).parent)
               }
             },
-            children: [rule]
+            children: rule.children
           }
-        }
-      },
-      loadRule = rules => {
-        const loadRuleValue = []
-        rules.forEach(rule => {
-          if (is.String(rule)) {
-            return loadRuleValue.push(rule)
-          }
-          const config = ruleList[rule._fc_drag_tag] || ruleList[rule.type]
-          const _children = rule.children
-          rule.children = []
-          if (rule.control) {
-            rule._control = rule.control
-            delete rule.control
-          }
-          if (config) {
-            rule = makeRule(config, rule)
-            if (_children) {
-              let children = rule.children[0].children
-
-              if (config.drag) {
-                children = children[0].children
+        ]
+        return rule
+      } else {
+        return {
+          type: 'DragTool',
+          props: {
+            dragBtn: config.dragBtn !== false,
+            children: config.children
+          },
+          effect: {
+            _fc_tool: true
+          },
+          inject: true,
+          slot: `slot-${rule.field ? rule.field : uniqueId()}`,
+          on: {
+            delete: ({ self }) => {
+              self.__fc__.rm()
+              clearActiveRule()
+            },
+            addComponent: ({ self }) => {
+              const top = getParent(self)
+              top.root.children.splice(
+                top.root.children.indexOf(top.parent) + 1,
+                0,
+                makeRule(self.children[0].config.config)
+              )
+            },
+            addChild: ({ self }) => {
+              const config = self.children[0].config.config
+              const item = ruleList[config.children]
+              if (!item) return
+              ;(!config.drag
+                ? self
+                : self.children[0]
+              ).children[0].children.push(makeRule(item))
+            },
+            copy: ({ self }) => {
+              const top = getParent(self),
+                copyRule = formCreate.copyRule(top.parent)
+              if (copyRule.slot) {
+                copyRule.slot = `slot-${uniqueId()}`
               }
-              children.push(...loadRule(_children))
+              top.root.children.splice(
+                top.root.children.indexOf(top.parent) + 1,
+                0,
+                copyRule
+              )
+            },
+            active: ({ self }) => {
+              toolActive(self.children[0])
             }
-          } else if (_children) {
-            rule.children = loadRule(_children)
-          }
-          loadRuleValue.push(rule)
-        })
-        return loadRuleValue
-      },
-      parseRule = children => {
-        return [...children].reduce((initial, rule) => {
-          if (is.String(rule)) {
-            initial.push(rule)
-            return initial
-          } else if (rule.type === 'DragBox') {
-            initial.push(...parseRule(rule.children))
-            return initial
-          } else if (rule.type === 'DragTool') {
-            rule = rule.children[0]
-            if (rule.type === 'DragBox') {
-              initial.push(...parseRule(rule.children))
-              return initial
-            }
-          }
-          if (!rule) return initial
-          rule = { ...rule }
-          if (rule.children.length) {
-            rule.children = parseRule(rule.children)
-          }
+          },
+          children: [rule]
+        }
+      }
+    }
+    const loadRule = (rules: Array<Rule>) => {
+      const loadRuleValue = []
+      rules.forEach(rule => {
+        if (is.String(rule)) {
+          return loadRuleValue.push(rule)
+        }
+        const config = ruleList[rule._fc_drag_tag] || ruleList[rule.type]
+        const _children = rule.children
+        rule.children = []
+        if (rule.control) {
+          rule._control = rule.control
+          delete rule.control
+        }
+        if (config) {
+          rule = makeRule(config, rule)
+          if (_children) {
+            let children = _children[0].children
 
-          delete rule.id
-          if (rule.config) {
-            delete rule.config.config
+            if (config.drag) {
+              children = children[0].children
+            }
+            children.push(...loadRule(_children))
           }
-          if (rule.effect) {
-            delete rule.effect._fc
-            delete rule.effect._fc_tool
-          }
-          if (rule._control) {
-            rule.control = rule._control
-            delete rule._control
-          }
-          Object.keys(rule)
-            .filter(
-              k =>
-                (Array.isArray(rule[k]) && rule[k].length === 0) ||
-                (is.Object(rule[k]) && Object.keys(rule[k]).length === 0)
-            )
-            .forEach(k => {
-              delete rule[k]
-            })
+        } else if (_children) {
+          rule.children = loadRule(_children)
+        }
+        loadRuleValue.push(rule)
+      })
+      return loadRuleValue
+    }
+    const parseRule = (children: any) => {
+      return [...children].reduce((initial, rule) => {
+        if (is.String(rule)) {
           initial.push(rule)
           return initial
-        }, [])
-      },
-      baseChange = (field, value, _, fapi, flag) => {
-        if (!flag && activeRule.value && fapi.activeRule === activeRule.value) {
-          activeRule.value[field] = value
+        } else if (rule.type === 'DragBox') {
+          initial.push(...parseRule(rule.children))
+          return initial
+        } else if (rule.type === 'DragTool') {
+          rule = rule.children[0]
+          if (rule.type === 'DragBox') {
+            initial.push(...parseRule(rule.children))
+            return initial
+          }
         }
-      },
-      propRemoveField = (field, _, fapi) => {
-        if (activeRule.value && fapi.activeRule === activeRule.value) {
-          dragForm.value.api.sync(activeRule.value)
-          if (field.indexOf('formCreate') === 0) {
-            field = field.replace('formCreate', '')
-            if (!field) return
-            field = lower(field)
-            if (field.indexOf('effect') === 0 && field.indexOf('>') > -1) {
-              delete activeRule.value.effect[field.split('>')[1]]
-            } else if (
-              field.indexOf('props') === 0 &&
-              field.indexOf('>') > -1
-            ) {
-              delete activeRule.value.props[field.split('>')[1]]
-            } else if (field === 'child') {
-              activeRule.value.children.splice(0, 1)
-            } else if (field) {
-              activeRule.value[field] = undefined
-            }
+        if (!rule) return initial
+        rule = { ...rule }
+        if (rule.children.length) {
+          rule.children = parseRule(rule.children)
+        }
+
+        delete rule.id
+        if (rule.config) {
+          delete rule.config.config
+        }
+        if (rule.effect) {
+          delete rule.effect._fc
+          delete rule.effect._fc_tool
+        }
+        if (rule._control) {
+          rule.control = rule._control
+          delete rule._control
+        }
+        Object.keys(rule)
+          .filter(
+            k =>
+              (Array.isArray(rule[k]) && rule[k].length === 0) ||
+              (is.Object(rule[k]) && Object.keys(rule[k]).length === 0)
+          )
+          .forEach(k => {
+            delete rule[k]
+          })
+        initial.push(rule)
+        return initial
+      }, [])
+    }
+    const baseChange = (field: string, value, _, fapi: Api, flag: boolean) => {
+      if (!flag && activeRule.value && fapi.activeRule === activeRule.value) {
+        activeRule.value[field] = value
+      }
+    }
+    const propRemoveField = (field: string, _, fapi: Api) => {
+      if (activeRule.value && fapi.activeRule === activeRule.value) {
+        dragForm.value.api.sync(activeRule.value)
+        if (field.indexOf('formCreate') === 0) {
+          field = field.replace('formCreate', '')
+          if (!field) return
+          field = lower(field)
+          if (field.indexOf('effect') === 0 && field.indexOf('>') > -1) {
+            delete activeRule.value.effect[field.split('>')[1]]
+          } else if (field.indexOf('props') === 0 && field.indexOf('>') > -1) {
+            delete activeRule.value.props[field.split('>')[1]]
+          } else if (field === 'child') {
+            activeRule.value.children.splice(0, 1)
+          } else if (field) {
+            activeRule.value[field] = undefined
+          }
+        } else {
+          delete activeRule.value.props[field]
+        }
+      }
+    }
+    const propChange = (field: string, value, _, fapi: Api, flag: boolean) => {
+      if (!flag && activeRule.value && fapi.activeRule === activeRule.value) {
+        if (field.indexOf('formCreate') === 0) {
+          field = field.replace('formCreate', '')
+          if (!field) return
+          field = lower(field)
+          if (field.indexOf('effect') === 0 && field.indexOf('>') > -1) {
+            activeRule.value.effect[field.split('>')[1]] = value
+          } else if (field.indexOf('props') === 0 && field.indexOf('>') > -1) {
+            activeRule.value.props[field.split('>')[1]] = value
+          } else if (field === 'child') {
+            activeRule.value.children[0] = value
           } else {
-            delete activeRule.value.props[field]
+            activeRule.value[field] = value
           }
-        }
-      },
-      propChange = (field, value, _, fapi, flag) => {
-        if (!flag && activeRule.value && fapi.activeRule === activeRule.value) {
-          if (field.indexOf('formCreate') === 0) {
-            field = field.replace('formCreate', '')
-            if (!field) return
-            field = lower(field)
-            if (field.indexOf('effect') === 0 && field.indexOf('>') > -1) {
-              activeRule.value.effect[field.split('>')[1]] = value
-            } else if (
-              field.indexOf('props') === 0 &&
-              field.indexOf('>') > -1
-            ) {
-              activeRule.value.props[field.split('>')[1]] = value
-            } else if (field === 'child') {
-              activeRule.value.children[0] = value
-            } else {
-              activeRule.value[field] = value
-            }
-          } else {
-            activeRule.value.props[field] = value
-            if (field === 'multiple') {
-              activeRule.value.value = activeRule.value.value || []
-              // 多选时，不为数组则转换为数组
-              if (!Array.isArray(activeRule.value.value)) {
-                activeRule.value.value = [activeRule.value.value]
-              }
+        } else {
+          activeRule.value.props[field] = value
+          if (field === 'multiple') {
+            activeRule.value.value = activeRule.value.value || []
+            // 多选时，不为数组则转换为数组
+            if (!Array.isArray(activeRule.value.value)) {
+              activeRule.value.value = [activeRule.value.value]
             }
           }
         }
-      },
-      validateChange = (field, value, _, fapi, flag) => {
-        if (activeRule.value && fapi.activeRule === activeRule.value) {
-          activeRule.value.validate = value
+      }
+    }
+    const validateChange = (
+      field: string,
+      value,
+      _,
+      fapi: Api,
+      flag: boolean
+    ) => {
+      if (activeRule.value && fapi.activeRule === activeRule.value) {
+        activeRule.value.validate = value
+      }
+    }
+    const addMenu = config => {
+      if (!config.name || !config.list) return
+      let flag = true
+      menuList.value.forEach((v, i: number) => {
+        if (v.name === config.name) {
+          v.list = [].concat(v.list, config.list)
+          flag = false
         }
-      },
-      addMenu = config => {
-        if (!config.name || !config.list) return
-        let flag = true
-        menuList.value.forEach((v, i) => {
-          if (v.name === config.name) {
-            v.list = [].concat(v.list, config.list)
-            flag = false
-          }
-        })
-        if (flag) {
-          menuList.value.push(config)
+      })
+      if (flag) {
+        menuList.value.push(config)
+      }
+    }
+    const removeMenu = (name: string) => {
+      ;[...menuList.value].forEach((v, i) => {
+        if (v.name === name) {
+          menuList.value.splice(i, 1)
         }
-      },
-      removeMenu = name => {
-        ;[...menuList.value].forEach((v, i) => {
-          if (v.name === name) {
-            menuList.value.splice(i, 1)
-          }
-        })
-      },
-      setMenuItem = (name, list) => {
-        menuList.value.forEach(v => {
-          if (v.name === name) {
-            v.list = list
-          }
-        })
-      },
-      appendMenuItem = (name, item) => {
-        menuList.value.forEach(v => {
-          if (v.name === name) {
-            v.list.push(item)
-          }
-        })
-      },
-      removeMenuItem = item => {
-        menuList.value.forEach(v => {
-          let idx
-          if (is.String(item)) {
-            ;[...v.list].forEach((menu, idx) => {
-              if (menu.name === item) {
-                v.list.splice(idx, 1)
-              }
-            })
-          } else {
-            if ((idx = v.list.indexOf(item)) > -1) {
+      })
+    }
+    const setMenuItem = (name: string, list) => {
+      menuList.value.forEach(v => {
+        if (v.name === name) {
+          v.list = list
+        }
+      })
+    }
+    const appendMenuItem = (name: string, item) => {
+      menuList.value.forEach(v => {
+        if (v.name === name) {
+          v.list.push(item)
+        }
+      })
+    }
+    const removeMenuItem = item => {
+      menuList.value.forEach(v => {
+        let idx
+        if (is.String(item)) {
+          ;[...v.list].forEach((menu, idx) => {
+            if (menu.name === item) {
               v.list.splice(idx, 1)
             }
-          }
-        })
-      },
-      addComponent = data => {
-        if (Array.isArray(data)) {
-          data.forEach(v => {
-            ruleList[v.name] = v
           })
         } else {
-          ruleList[data.name] = data
+          if ((idx = v.list.indexOf(item)) > -1) {
+            v.list.splice(idx, 1)
+          }
         }
-      },
-      getRule = () => {
-        return parseRule(deepCopy(dragForm.value.api.rule[0].children))
-      },
-      getJson = () => {
-        return formCreate.toJson(getRule())
-      },
-      getOption = () => {
-        const option = deepCopy(form.value.value)
-        delete option.submitBtn
-        return option
-      },
-      setRule = rules => {
-        children.value = loadRule(
-          is.String(rules) ? formCreate.parseJson(rules) : rules
-        )
-        clearActiveRule()
-        dragForm.value.rule = makeDragRule(children.value)
-      },
-      clearActiveRule = () => {
-        activeRule.value = null
-        activeTab.value = 'form'
-      },
-      setOption = option => {
-        const _ = option
-        _.submitBtn = false
-        delete _.resetBtn
-        form.value.value = _
-      },
-      viewer = () => {
-        // 预览
-        modal.value.show = true
-        previewDialogForm.value.rule = getRule()
-      },
-      clear = () => {
-        setRule([])
-      },
-      getResult = formData => {
-        // 预览提交
-        console.log('result:', formData)
-      },
-      addRuleRule = () => {
-        // 添加规则
-        try {
-          modal.value.data = getMirrorValue()
-          setRule(modal.value.data, true)
-          modal.value.addShow = false
-        } catch (e) {
-          console.error(e)
-        }
-      },
-      onAddValue = () => {
-        // 添加默认值 弹出框
-        modal.value.addShow = true
-        modal.value.data = formCreate.toJson(getRule(), 2)
-        nextTick(() => {
-          loadCMirror()
+      })
+    }
+    const addComponent = data => {
+      if (Array.isArray(data)) {
+        data.forEach(v => {
+          ruleList[v.name] = v
         })
+      } else {
+        ruleList[data.name] = data
       }
+    }
+    const getRule = () => {
+      return parseRule(deepCopy(dragForm.value.api.rule[0].children))
+    }
+    const getJson = () => {
+      return formCreate.toJson(getRule())
+    }
+    const getOption = () => {
+      const option = deepCopy(form.value.value)
+      delete option.submitBtn
+      return option
+    }
+    const setRule = (rules, flag?: boolean) => {
+      children.value = loadRule(
+        is.String(rules) ? formCreate.parseJson(rules) : rules
+      )
+      clearActiveRule()
+      dragForm.value.rule = makeDragRule(children.value)
+    }
+    const clearActiveRule = () => {
+      activeRule.value = null
+      activeTab.value = 'form'
+    }
+    const setOption = (option: Options) => {
+      const _ = option
+      _.submitBtn = false
+      delete _.resetBtn
+      form.value.value = _
+    }
+    const viewer = () => {
+      // 预览
+      modal.value.show = true
+      previewDialogForm.value.rule = getRule()
+    }
+    const clear = () => {
+      setRule([])
+    }
+    const getResult = formData => {
+      // 预览提交
+      console.log('result:', formData)
+    }
+    const addRuleRule = () => {
+      // 添加规则
+      try {
+        modal.value.data = getMirrorValue()
+        setRule(modal.value.data, true)
+        modal.value.addShow = false
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    const onAddValue = () => {
+      // 添加默认值 弹出框
+      modal.value.addShow = true
+      modal.value.data = formCreate.toJson(getRule(), 2)
+      nextTick(() => {
+        loadCMirror()
+      })
+    }
 
     const loadCMirror = () => {
       // 加载编辑器

@@ -109,7 +109,7 @@ export default defineComponent({
       const str = cMirror.value.getValue()
       let val
       try {
-        val = eval('(function(){return ' + str + '})')
+        val = eval('(function(){return ' + str + '}())')
       } catch (e) {
         err.value = ` (${e})`
         return

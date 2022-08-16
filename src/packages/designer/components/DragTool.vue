@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, toRefs, inject, onBeforeUnmount } from 'vue'
+import { defineComponent, ref, toRefs, inject, onBeforeUnmount, Ref } from 'vue'
 
 let cid = 1
 export default defineComponent({
@@ -58,7 +58,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const { unique } = toRefs(props),
       id = ref(unique.value || cid++),
-      state = inject('fcx')
+      state = inject<Ref<{ active: string }> | any>('fcx')
 
     const active = () => {
       if (state.value.active !== id.value) {

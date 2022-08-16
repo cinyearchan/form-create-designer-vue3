@@ -1,3 +1,5 @@
+const isProduction = process.env.NODE_ENV === 'production'
+
 module.exports = {
   env: {
     browser: true,
@@ -26,7 +28,8 @@ module.exports = {
   plugins: ['vue', '@typescript-eslint', 'prettier'],
   rules: {
     'object-curly-spacing': 'off',
-    'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    'no-console': isProduction ? 'warn' : 'off',
+    'no-debugger': isProduction ? 'error' : 'off',
     '@typescript-eslint/no-unused-vars': 'warn',
     '@typescript-eslint/no-empty-function': 'warn',
     'vue/multi-word-component-names': [

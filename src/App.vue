@@ -3,12 +3,8 @@
     <div class="fc-designer-wrap">
       <form-designer ref="fcDesignerRef">
         <template #btns>
-          <el-button plain @click="printLog($refs.fcDesignerRef)">
-            打印JSON
-          </el-button>
-          <el-button plain @click="printOptions($refs.fcDesignerRef)">
-            打印Options
-          </el-button>
+          <el-button plain @click="printLog()"> 打印JSON </el-button>
+          <el-button plain @click="printOptions()"> 打印Options </el-button>
         </template>
       </form-designer>
     </div>
@@ -18,9 +14,11 @@
 <script lang="ts">
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-import { defineComponent } from 'vue'
+import { defineComponent, ref } from 'vue'
 import formDesigner from '@/packages/designer/index'
 import zhCn from 'element-plus/lib/locale/lang/zh-cn'
+
+type IFcDesigner = InstanceType<typeof formDesigner>
 
 const componentName = 'index'
 
@@ -28,17 +26,19 @@ export default defineComponent({
   name: componentName,
   components: { formDesigner },
   setup() {
-    const printLog = (ref: any) => {
-      console.log('rule', ref.getRule())
+    const fcDesignerRef = ref<IFcDesigner | null>(null)
+    const printLog = () => {
+      console.log('rule', fcDesignerRef.value?.getRule())
     }
-    const printOptions = (ref: any) => {
-      console.log('option', ref.getOption())
+    const printOptions = () => {
+      console.log('option', fcDesignerRef.value?.getOption())
     }
 
     return {
       printLog,
       printOptions,
-      zhCn
+      zhCn,
+      fcDesignerRef
     }
   }
 })

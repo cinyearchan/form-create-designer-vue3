@@ -1,5 +1,6 @@
 import is, { hasProperty } from '@form-create/utils/lib/type.js'
 import { parseFn } from '@form-create/utils/lib/json.js'
+import { Control } from '@form-create/element-ui'
 
 export function makeRequiredRule() {
   return {
@@ -13,26 +14,13 @@ export function upper(str: string) {
   return str.replace(str[0], str[0].toLocaleUpperCase())
 }
 
-interface IControl {
-  value: number
-  rule: IRule[]
-}
-
-interface IRule {
-  type: string
-  value?: any[]
-  field: string
-  props: any
-  style?: string
-}
-
 export function makeOptionsRule(to: string, flag?: boolean) {
   const options = [
     { label: 'JSON数据', value: 0 },
     { label: '接口数据', value: 1 }
   ]
 
-  const control: IControl[] = [
+  const control: Control[] = [
     {
       value: 0,
       rule: [

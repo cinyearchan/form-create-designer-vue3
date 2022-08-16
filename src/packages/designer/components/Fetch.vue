@@ -11,7 +11,7 @@
 
 <script lang="ts">
 import { defineComponent, toRefs, ref, watch } from 'vue'
-import formCreate from '@form-create/element-ui'
+import formCreate, { Api, Rule } from '@form-create/element-ui'
 
 const componentName = 'Fetch'
 
@@ -23,13 +23,13 @@ export default defineComponent({
   props: {
     modelValue: [Object, String],
     to: { type: String },
-    formcreateinject: { type: Object }
+    formCreateInject: { type: Object }
   },
   emits: ['update:modelValue'],
   setup(props, { emit }) {
     const { to, modelValue } = toRefs(props),
       timeFn = ref(),
-      fApi = ref({}),
+      fApi = ref<Api | any>({}),
       fValue = ref(modelValue.value ? modelValue.value : {}),
       option = ref({
         form: {
@@ -88,7 +88,7 @@ export default defineComponent({
           type: 'Struct',
           field: 'parse',
           title: '结果解析函数',
-          value: (res, rule, fapi) =>
+          value: (res: any, rule: Rule, fapi: Api) =>
             res.rows.map((item: any) => {
               return { label: item.name, value: item.adcode }
             }),
@@ -108,7 +108,7 @@ export default defineComponent({
 
     const fApiSubmit = () => {
       if (fApi.value) {
-        fApi.value.submit(formData => {
+        fApi.value.submit((formData: any) => {
           emit('update:modelValue', formData)
         })
       }
