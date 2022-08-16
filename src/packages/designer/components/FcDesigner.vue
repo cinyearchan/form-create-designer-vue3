@@ -420,7 +420,7 @@ export default defineComponent({
           }
         }
       },
-      makeRule = (config, _rule) => {
+      makeRule = (config, _rule?) => {
         const rule = _rule || config.rule()
         rule.config = { config }
         if (!rule.effect) rule.effect = {}
