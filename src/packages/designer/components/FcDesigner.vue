@@ -209,14 +209,31 @@ export default defineComponent({
       added = ref(),
       activeTab = ref('form'),
       activeRule = ref(),
-      children = ref([]),
+      children = ref<Array<Rule | string>>([]),
       menuList = ref(menu.value || createMenu()),
       showBaseRule = ref(false),
-      dragForm = ref({
+      dragForm = ref<{
+        rule: Rule[]
+        api: object
+      }>({
         rule: [],
         api: {}
       }),
-      form = ref({
+      form = ref<{
+        rule: Rule[]
+        option: {
+          form: {
+            labelPosition: string
+          }
+          submitBtn: boolean
+        }
+        value: {
+          form: {
+            layout: string
+          }
+          submitBtn: boolean
+        }
+      }>({
         rule: [],
         option: {
           form: {
@@ -231,7 +248,23 @@ export default defineComponent({
           submitBtn: false
         }
       }),
-      baseForm = ref({
+      baseForm = ref<{
+        rule: Rule[]
+        api: object
+        value:
+          | null
+          | string
+          | number
+          | boolean
+          | { field: string; type: string; title: string; _control: string }
+        options: {
+          form: {
+            labelPosition: string
+          }
+          submitBtn: boolean
+          mounted: (fapi: Api) => void
+        }
+      }>({
         rule: [],
         api: {},
         value: null,
@@ -245,7 +278,18 @@ export default defineComponent({
           }
         }
       }),
-      validateForm = ref({
+      validateForm = ref<{
+        rule: unknown[]
+        api: object
+        value: unknown
+        options: {
+          form: {
+            labelPosition: string
+          }
+          submitBtn: boolean
+          mounted: (fapi: Api) => void
+        }
+      }>({
         rule: [],
         api: {},
         value: null,
@@ -259,8 +303,22 @@ export default defineComponent({
           }
         }
       }),
-      propsFormMap = ref({}),
-      propsForm = ref({
+      propsFormMap = ref<{ [key: string]: Rule }>({}),
+      propsForm = ref<{
+        rule: Rule[]
+        api: object
+        value: unknown
+        options: {
+          form: {
+            labelPosition: string
+          }
+          row: {
+            type: any
+          }
+          submitBtn: boolean
+          mounted: (fapi: Api) => void
+        }
+      }>({
         rule: [],
         api: {},
         value: {},
@@ -283,7 +341,17 @@ export default defineComponent({
       }),
       cMirror = ref(),
       editorRef = ref(),
-      previewDialogForm = ref({
+      previewDialogForm = ref<{
+        api: object
+        value: string | number | boolean | null
+        rule: Rule[]
+        options: {
+          form: {
+            layout: string
+          }
+          submitBtn: boolean
+        }
+      }>({
         api: {},
         value: null,
         rule: [],
@@ -399,7 +467,7 @@ export default defineComponent({
           propsForm.value.rule = propsFormMap.value[rule.field]
         } else {
           propsForm.value.rule = rule.config.config.props()
-          propsFormMap.value[rule.field] = propsForm.value.rule
+          propsFormMap.value[rule.field as string] = propsForm.value.rule
         }
       }
 
@@ -492,10 +560,11 @@ export default defineComponent({
                 if (!item) return
                 ;(!config.drag
                   ? top.parent
-                  : top.parent.children[0]
+                  : top.parent!.children![0]
                 ).children[0].children.push(makeRule(item))
               },
-              copy: ({ self }) => {
+              copy: n => {
+                const { self } = n
                 const top = getParent(self),
                   copyRule = formCreate.copyRule(top.parent)
                 if (copyRule.slot) {
@@ -508,6 +577,7 @@ export default defineComponent({
                 )
               },
               active: ({ self }) => {
+                console.log('self1', self)
                 toolActive(getParent(self).parent)
               }
             },
@@ -562,6 +632,7 @@ export default defineComponent({
               )
             },
             active: ({ self }) => {
+              console.log('self', self)
               toolActive(self.children[0])
             }
           },
@@ -569,33 +640,36 @@ export default defineComponent({
         }
       }
     }
-    const loadRule = (rules: Array<Rule>) => {
-      const loadRuleValue = []
+    const loadRule = (rules: Array<Rule | string>) => {
+      const loadRuleValue: Array<Rule | string> = []
       rules.forEach(rule => {
-        if (is.String(rule)) {
+        if (is.String(rule as string) || typeof rule === 'string') {
           return loadRuleValue.push(rule)
-        }
-        const config = ruleList[rule._fc_drag_tag] || ruleList[rule.type]
-        const _children = rule.children
-        rule.children = []
-        if (rule.control) {
-          rule._control = rule.control
-          delete rule.control
-        }
-        if (config) {
-          rule = makeRule(config, rule)
-          if (_children) {
-            let children = _children[0].children
-
-            if (config.drag) {
-              children = children[0].children
-            }
-            children.push(...loadRule(_children))
+        } else {
+          const config =
+            ruleList[rule._fc_drag_tag] || ruleList[rule.type as string]
+          const _children = rule.children
+          rule.children = []
+          if (rule.control) {
+            rule._control = rule.control
+            delete rule.control
           }
-        } else if (_children) {
-          rule.children = loadRule(_children)
+          if (config) {
+            console.log('config', config)
+            rule = makeRule(config, rule)
+            if (_children) {
+              let children = _children[0].children
+
+              if (config.drag) {
+                children = children[0].children
+              }
+              children.push(...loadRule(_children as Rule[]))
+            }
+          } else if (_children) {
+            rule.children = loadRule(_children as Rule[])
+          }
+          loadRuleValue.push(rule)
         }
-        loadRuleValue.push(rule)
       })
       return loadRuleValue
     }
@@ -645,7 +719,13 @@ export default defineComponent({
         return initial
       }, [])
     }
-    const baseChange = (field: string, value, _, fapi: Api, flag: boolean) => {
+    const baseChange = (
+      field: string,
+      value: string | number | boolean,
+      _,
+      fapi: Api,
+      flag: boolean
+    ) => {
       if (!flag && activeRule.value && fapi.activeRule === activeRule.value) {
         activeRule.value[field] = value
       }
@@ -671,7 +751,13 @@ export default defineComponent({
         }
       }
     }
-    const propChange = (field: string, value, _, fapi: Api, flag: boolean) => {
+    const propChange = (
+      field: string,
+      value: string | number | boolean,
+      _,
+      fapi: Api,
+      flag: boolean
+    ) => {
       if (!flag && activeRule.value && fapi.activeRule === activeRule.value) {
         if (field.indexOf('formCreate') === 0) {
           field = field.replace('formCreate', '')
@@ -700,7 +786,7 @@ export default defineComponent({
     }
     const validateChange = (
       field: string,
-      value,
+      value: string | number | boolean,
       _,
       fapi: Api,
       flag: boolean
@@ -709,7 +795,7 @@ export default defineComponent({
         activeRule.value.validate = value
       }
     }
-    const addMenu = config => {
+    const addMenu = (config: { name: string; list: any }) => {
       if (!config.name || !config.list) return
       let flag = true
       menuList.value.forEach((v, i: number) => {
