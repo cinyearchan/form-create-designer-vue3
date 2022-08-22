@@ -1,3 +1,4 @@
+import { IDividerRule, IDividerProps } from '../../types/config/index'
 const label = '分割线'
 const name = 'el-divider'
 
@@ -5,7 +6,7 @@ export default {
   icon: 'icon-divider',
   label,
   name,
-  rule() {
+  rule(): IDividerRule {
     return {
       type: name,
       props: {},
@@ -14,7 +15,7 @@ export default {
       children: ['']
     }
   },
-  props() {
+  props(): IDividerProps[] {
     return [
       {
         type: 'select',

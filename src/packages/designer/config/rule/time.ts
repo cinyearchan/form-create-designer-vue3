@@ -1,5 +1,6 @@
 import uniqueId from '@form-create/utils/lib/unique.js'
 import { makeRequiredRule } from '../../utils'
+import { ITimeProps, ITimeRule } from '../../types/config/index'
 
 const label = '时间选择器'
 const name = 'timePicker'
@@ -8,7 +9,7 @@ export default {
   icon: 'icon-time',
   label,
   name,
-  rule() {
+  rule(): ITimeRule {
     return {
       type: name,
       field: uniqueId(),
@@ -20,7 +21,7 @@ export default {
       }
     }
   },
-  props() {
+  props(): ITimeProps[] {
     return [
       makeRequiredRule(),
       {

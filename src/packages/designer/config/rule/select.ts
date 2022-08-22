@@ -1,5 +1,6 @@
 import uniqueId from '@form-create/utils/lib/unique.js'
 import { makeOptionsRule, makeRequiredRule } from '../../utils/index'
+import { ISelectProps, ISelectRule } from '../../types/config/index'
 
 const label = '选择器'
 const name = 'select'
@@ -8,7 +9,7 @@ export default {
   icon: 'icon-select',
   label,
   name,
-  rule() {
+  rule(): ISelectRule {
     return {
       type: name,
       field: uniqueId(),
@@ -26,7 +27,7 @@ export default {
       ]
     }
   },
-  props() {
+  props(): ISelectProps[] {
     return [
       makeRequiredRule(),
       makeOptionsRule('options'),

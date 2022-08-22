@@ -1,3 +1,4 @@
+import { ITabPaneProps, ITabPaneRule } from '../../types/config/index'
 const label = '标签页'
 const name = 'tab-pane'
 
@@ -8,14 +9,14 @@ export default {
   drag: true,
   dragBtn: false,
   mask: false,
-  rule() {
+  rule(): ITabPaneRule {
     return {
       type: 'el-tab-pane',
       props: { label: '新标签页' },
       children: []
     }
   },
-  props() {
+  props(): ITabPaneProps[] {
     return [
       { type: 'input', field: 'label', title: '选项卡标题' },
       {

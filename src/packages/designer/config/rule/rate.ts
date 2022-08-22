@@ -1,5 +1,6 @@
 import uniqueId from '@form-create/utils/lib/unique.js'
 import { makeRequiredRule } from '../../utils'
+import { IRateProps, IRateRule } from '../../types/config/index'
 
 const label = '评分'
 const name = 'rate'
@@ -8,7 +9,7 @@ export default {
   icon: 'icon-rate',
   label,
   name,
-  rule() {
+  rule(): IRateRule {
     return {
       type: name,
       field: uniqueId(),
@@ -20,7 +21,7 @@ export default {
       }
     }
   },
-  props() {
+  props(): IRateProps[] {
     return [
       makeRequiredRule(),
       { type: 'inputNumber', field: 'max', title: '最大分值' },

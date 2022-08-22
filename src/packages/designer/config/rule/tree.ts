@@ -1,4 +1,5 @@
 import uniqueId from '@form-create/utils/lib/unique.js'
+import { ITreeProps, ITreeRule } from '../../types/config'
 import { makeOptionsRule, makeRequiredRule } from '../../utils/index'
 
 const label = '树形控件'
@@ -8,7 +9,7 @@ export default {
   icon: 'icon-tree',
   label,
   name,
-  rule() {
+  rule(): ITreeRule {
     return {
       type: name,
       field: uniqueId(),
@@ -77,7 +78,7 @@ export default {
       }
     }
   },
-  props() {
+  props(): ITreeProps[] {
     return [
       makeRequiredRule(),
       makeOptionsRule('props.data', false),

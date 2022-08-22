@@ -1,3 +1,4 @@
+import { ISpanProps, ISpanRule } from '../../types/config/index'
 const label = '文字'
 const name = 'span'
 
@@ -5,7 +6,7 @@ export default {
   icon: 'icon-span',
   label,
   name,
-  rule() {
+  rule(): ISpanRule {
     return {
       type: name,
       title: '文字',
@@ -13,7 +14,7 @@ export default {
       children: ['这是一段文字']
     }
   },
-  props() {
+  props(): ISpanProps[] {
     return [
       {
         type: 'input',

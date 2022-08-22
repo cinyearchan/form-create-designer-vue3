@@ -349,9 +349,6 @@ export default defineComponent({
       ]
     }
     const dragAdd = (children: unknown[], evt: any) => {
-      debugger
-      console.log('add evt', evt)
-      console.log('children', children)
       const newIndex = evt.newIndex
       const menu = evt.item._underlying_vm_
       if (menu && menu.name) {
@@ -369,7 +366,7 @@ export default defineComponent({
       children: unknown[],
       { newIndex, oldIndex }: { newIndex: number; oldIndex: number }
     ) => {
-      console.log('end', newIndex, oldIndex)
+      // console.log('end', newIndex, oldIndex)
       if (
         !added.value &&
         !(moveRule.value === children && newIndex === oldIndex)
@@ -406,7 +403,7 @@ export default defineComponent({
         }
       }
 
-      const formData = {
+      const formData: { [key: string]: any; formCreateChild: any } = {
         ...rule.props,
         formCreateChild:
           rule.children && rule.children.length > 0 ? rule.children[0] : []

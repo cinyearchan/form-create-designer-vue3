@@ -1,4 +1,5 @@
 import uniqueId from '@form-create/utils/lib/unique.js'
+import { IHiddenProps, IHiddenRule } from '../../types/config/index'
 
 const label = '隐藏域'
 const name = 'hidden'
@@ -7,7 +8,7 @@ export default {
   icon: 'icon-input',
   label,
   name,
-  rule() {
+  rule(): IHiddenRule {
     return {
       type: name,
       field: uniqueId(),
@@ -15,7 +16,7 @@ export default {
       props: {}
     }
   },
-  props() {
+  props(): IHiddenProps[] {
     return [
       { type: 'input', field: 'formCreateRealType', title: '替换type' },
       {

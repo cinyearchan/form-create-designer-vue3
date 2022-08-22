@@ -1,3 +1,4 @@
+import { IRowRule, IRowProps } from '../../types/config/index'
 const label = '栅格布局'
 const name = 'row'
 
@@ -6,7 +7,7 @@ export default {
   label,
   name,
   mask: false,
-  rule() {
+  rule(): IRowRule {
     return {
       type: 'FcRow',
       props: {},
@@ -14,7 +15,7 @@ export default {
     }
   },
   children: 'col',
-  props() {
+  props(): IRowProps[] {
     return [
       { type: 'inputNumber', field: 'gutter', title: '栅格间隔' },
       {

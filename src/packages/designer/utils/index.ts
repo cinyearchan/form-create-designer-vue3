@@ -1,8 +1,14 @@
 import is, { hasProperty } from '@form-create/utils/lib/type.js'
 import { parseFn } from '@form-create/utils/lib/json.js'
-import { Control } from '@form-create/element-ui'
+import { Control, Options } from '@form-create/element-ui'
 
-export function makeRequiredRule() {
+interface IRequiredRule {
+  type: 'Required'
+  field: 'formCreateEffect>required'
+  title: '是否必填'
+}
+
+export function makeRequiredRule(): IRequiredRule {
   return {
     type: 'Required',
     field: 'formCreateEffect>required',
@@ -14,7 +20,19 @@ export function upper(str: string) {
   return str.replace(str[0], str[0].toLocaleUpperCase())
 }
 
-export function makeOptionsRule(to: string, flag?: boolean) {
+interface IOptionsRule {
+  type: string
+  title: string
+  field: string
+  value: number
+  options: Array<{ label: string; value: number }>
+  props: {
+    type: string
+  }
+  control: Control[]
+}
+
+export function makeOptionsRule(to: string, flag?: boolean): IOptionsRule {
   const options = [
     { label: 'JSON数据', value: 0 },
     { label: '接口数据', value: 1 }

@@ -1,3 +1,4 @@
+import { IColProps, IColRule } from '../../types/config/index'
 const name = 'col'
 
 export default {
@@ -6,14 +7,14 @@ export default {
   dragBtn: false,
   inside: true,
   mask: false,
-  rule() {
+  rule(): IColRule {
     return {
       type: name,
       props: { span: 12 },
       children: []
     }
   },
-  props() {
+  props(): IColProps[] {
     return [
       {
         type: 'slider',

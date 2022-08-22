@@ -1,3 +1,5 @@
+import { IButtonProps, IButtonRule } from '../../types/config'
+
 const label = '按钮'
 const name = 'el-button'
 
@@ -6,14 +8,14 @@ export default {
   label,
   name,
   mask: false,
-  rule() {
+  rule(): IButtonRule {
     return {
       type: name,
       props: {},
       children: ['按钮']
     }
   },
-  props() {
+  props(): IButtonProps[] {
     return [
       {
         type: 'input',

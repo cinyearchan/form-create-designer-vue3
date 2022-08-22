@@ -1,5 +1,6 @@
 import uniqueId from '@form-create/utils/lib/unique.js'
 import { makeRequiredRule } from '../../utils'
+import { ISwitchProps, ISwitchRule } from '../../types/config/index'
 
 const label = '开关'
 const name = 'switch'
@@ -8,7 +9,7 @@ export default {
   icon: 'icon-switch',
   label,
   name,
-  rule() {
+  rule(): ISwitchRule {
     return {
       type: name,
       field: uniqueId(),
@@ -20,7 +21,7 @@ export default {
       }
     }
   },
-  props() {
+  props(): ISwitchProps[] {
     return [
       makeRequiredRule(),
       { type: 'switch', field: 'disabled', title: '是否禁用' },

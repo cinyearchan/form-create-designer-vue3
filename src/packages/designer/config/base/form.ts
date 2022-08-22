@@ -1,4 +1,6 @@
-export default function form() {
+import { IBaseForm } from '../../types/config'
+
+export default function form(): IBaseForm[] {
   return [
     {
       type: 'radio',

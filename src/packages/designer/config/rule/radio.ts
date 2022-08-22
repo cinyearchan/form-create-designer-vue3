@@ -1,5 +1,6 @@
 import uniqueId from '@form-create/utils/lib/unique.js'
 import { makeOptionsRule, makeRequiredRule } from '../../utils/index'
+import { IRadioRule, IRadioProps } from '../../types/config/index'
 
 const label = '单选框'
 const name = 'radio'
@@ -8,7 +9,7 @@ export default {
   icon: 'icon-radio',
   label,
   name,
-  rule() {
+  rule(): IRadioRule {
     return {
       type: name,
       field: uniqueId(),
@@ -25,7 +26,7 @@ export default {
       ]
     }
   },
-  props() {
+  props(): IRadioProps[] {
     return [
       makeRequiredRule(),
       makeOptionsRule('options'),

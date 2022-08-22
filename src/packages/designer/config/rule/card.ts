@@ -1,3 +1,5 @@
+import { ICardRule, ICardProps } from '../../types/config/index'
+
 const label = '卡片'
 const name = 'card'
 
@@ -6,7 +8,7 @@ export default {
   label,
   name,
   drag: true,
-  rule() {
+  rule(): ICardRule {
     return {
       type: 'el-card',
       props: {},
@@ -14,7 +16,7 @@ export default {
       children: []
     }
   },
-  props() {
+  props(): ICardProps[] {
     return [
       { type: 'input', field: 'activeTabKey', title: '当前激活页签的 key' },
       { type: 'input', field: 'title', title: '卡片标题' },

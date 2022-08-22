@@ -1,5 +1,6 @@
 import uniqueId from '@form-create/utils/lib/unique.js'
 import { makeRequiredRule } from '../../utils'
+import { IColorProps, IColorRule } from '../../types/config/index'
 
 const label = '颜色选择器'
 const name = 'colorPicker'
@@ -8,7 +9,7 @@ export default {
   icon: 'icon-color',
   label,
   name,
-  rule() {
+  rule(): IColorRule {
     return {
       type: name,
       field: uniqueId(),
@@ -17,7 +18,7 @@ export default {
       props: {}
     }
   },
-  props() {
+  props(): IColorProps[] {
     return [
       { type: 'switch', field: 'disabled', title: '是否禁用' },
       {

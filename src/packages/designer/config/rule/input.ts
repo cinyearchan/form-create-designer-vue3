@@ -1,5 +1,6 @@
 import uniqueId from '@form-create/utils/lib/unique.js'
 import { makeRequiredRule } from '../../utils'
+import { IInputProps, IInputRule } from '../../types/config/index'
 
 const label = '输入框'
 const name = 'input'
@@ -8,7 +9,7 @@ export default {
   icon: 'icon-input',
   label,
   name,
-  rule() {
+  rule(): IInputRule {
     return {
       type: name,
       field: uniqueId(),
@@ -20,7 +21,7 @@ export default {
       }
     }
   },
-  props() {
+  props(): IInputProps[] {
     return [
       makeRequiredRule(),
       {

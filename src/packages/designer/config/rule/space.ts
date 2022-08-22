@@ -1,3 +1,4 @@
+import { ISpaceProps, ISpaceRule } from '../../types/config/index'
 const label = '间距'
 const name = 'div'
 
@@ -5,7 +6,7 @@ export default {
   icon: 'icon-space',
   label,
   name,
-  rule() {
+  rule(): ISpaceRule {
     return {
       type: name,
       wrap: {
@@ -19,7 +20,7 @@ export default {
       children: []
     }
   },
-  props() {
+  props(): ISpaceProps[] {
     return [
       {
         type: 'object',

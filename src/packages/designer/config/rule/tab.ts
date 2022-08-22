@@ -1,3 +1,4 @@
+import { ITabProps, ITabRule } from '../../types/config/index'
 const label = '标签页'
 const name = 'tab'
 
@@ -7,13 +8,13 @@ export default {
   name,
   children: 'tab-pane',
   mask: false,
-  rule() {
+  rule(): ITabRule {
     return {
       type: 'el-tabs',
       children: []
     }
   },
-  props() {
+  props(): ITabProps[] {
     return [
       {
         type: 'select',

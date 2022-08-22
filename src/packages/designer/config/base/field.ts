@@ -1,4 +1,6 @@
-export default function field() {
+import { IBaseField } from '../../types/config'
+
+export default function field(): IBaseField[] {
   return [
     {
       type: 'input',

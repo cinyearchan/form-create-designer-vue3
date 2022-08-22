@@ -1,24 +1,7 @@
+import { IAlertRule, IAlertProps } from '../../types/config'
+
 const label = '提示'
 const name = 'el-alert'
-
-export interface IAlertRule {
-  type: string
-  props: {
-    title: string
-    description: string
-    type: string
-    effect: string
-  }
-  children: unknown[]
-}
-
-export interface IAlertProps {
-  type: string
-  field: string
-  title: string
-  value?: boolean
-  options?: Array<{ label: string; value: any }>
-}
 
 export default {
   icon: 'icon-alert',

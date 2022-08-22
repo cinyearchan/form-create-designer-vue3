@@ -1,3 +1,5 @@
+import { IProgressProps, IProgressRule } from '../../types/config'
+
 const label = '进度条'
 const name = 'el-progress'
 
@@ -5,7 +7,7 @@ export default {
   icon: 'icon-alert',
   label,
   name,
-  rule() {
+  rule(): IProgressRule {
     return {
       type: name,
       props: {
@@ -14,7 +16,7 @@ export default {
       modelField: 'percent'
     }
   },
-  props() {
+  props(): IProgressProps[] {
     return [
       { type: 'input', field: 'formCreateStyle', title: '样式Style' },
       {

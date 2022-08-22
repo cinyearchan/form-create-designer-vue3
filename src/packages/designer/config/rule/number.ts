@@ -1,5 +1,6 @@
 import uniqueId from '@form-create/utils/lib/unique.js'
 import { makeRequiredRule } from '../../utils'
+import { INumberProps, INumberRule } from '../../types/config/index'
 
 const label = '计数器'
 const name = 'inputNumber'
@@ -8,7 +9,7 @@ export default {
   icon: 'icon-number',
   label,
   name,
-  rule() {
+  rule(): INumberRule {
     return {
       type: name,
       field: uniqueId(),
@@ -20,7 +21,7 @@ export default {
       }
     }
   },
-  props() {
+  props(): INumberProps[] {
     return [
       makeRequiredRule(),
       { type: 'inputNumber', field: 'min', title: '设置计数器允许的最小值' },

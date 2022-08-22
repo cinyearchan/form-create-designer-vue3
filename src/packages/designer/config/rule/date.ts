@@ -1,4 +1,5 @@
 import uniqueId from '@form-create/utils/lib/unique.js'
+import { IDateRule, IDateProps } from '../../types/config'
 import { makeRequiredRule } from '../../utils'
 
 const label = '日期选择器'
@@ -8,7 +9,7 @@ export default {
   icon: 'icon-date',
   label,
   name,
-  rule() {
+  rule(): IDateRule {
     return {
       type: name,
       field: uniqueId(),
@@ -20,7 +21,7 @@ export default {
       }
     }
   },
-  props() {
+  props(): IDateProps[] {
     return [
       makeRequiredRule(),
       {

@@ -1,4 +1,5 @@
 import uniqueId from '@form-create/utils/lib/unique.js'
+import { ISliderProps, ISliderRule } from '../../types/config'
 import { makeRequiredRule } from '../../utils'
 
 const label = '滑块'
@@ -8,7 +9,7 @@ export default {
   icon: 'icon-slider',
   label,
   name,
-  rule() {
+  rule(): ISliderRule {
     return {
       type: name,
       field: uniqueId(),
@@ -20,7 +21,7 @@ export default {
       }
     }
   },
-  props() {
+  props(): ISliderProps[] {
     return [
       makeRequiredRule(),
       { type: 'inputNumber', field: 'min', title: '最小值' },

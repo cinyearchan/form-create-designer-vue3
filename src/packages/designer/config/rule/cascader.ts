@@ -1,5 +1,6 @@
 import uniqueId from '@form-create/utils/lib/unique.js'
 import { makeOptionsRule, makeRequiredRule } from '../../utils/index'
+import { ICascaderProps, ICascaderRule } from '../../types/config/index'
 
 const label = '级联选择器'
 const name = 'cascader'
@@ -8,7 +9,7 @@ export default {
   icon: 'icon-cascader',
   label,
   name,
-  rule() {
+  rule(): ICascaderRule {
     return {
       type: name,
       field: uniqueId(),
@@ -165,7 +166,7 @@ export default {
       }
     }
   },
-  props() {
+  props(): ICascaderProps[] {
     return [
       makeRequiredRule(),
       makeOptionsRule('props.options', false),

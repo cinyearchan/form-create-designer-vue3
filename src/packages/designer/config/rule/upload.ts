@@ -1,5 +1,6 @@
 import uniqueId from '@form-create/utils/lib/unique.js'
 import { makeRequiredRule } from '../../utils'
+import { IUploadRule, IUploadProps } from '../../types/config/index'
 
 const label = '上传'
 const name = 'upload'
@@ -8,7 +9,7 @@ export default {
   icon: 'icon-upload',
   label,
   name,
-  rule() {
+  rule(): IUploadRule {
     return {
       type: 'upload',
       field: 'pic',
@@ -31,7 +32,7 @@ export default {
       }
     }
   },
-  props() {
+  props(): IUploadProps[] {
     return [
       makeRequiredRule(),
       {

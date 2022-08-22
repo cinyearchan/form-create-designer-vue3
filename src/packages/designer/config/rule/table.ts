@@ -1,4 +1,5 @@
 import uniqueId from '@form-create/utils/lib/unique.js'
+import { ITableProps, ITableRule } from '../../types/config/index'
 
 const label = '表格'
 const name = 'group-table'
@@ -8,7 +9,7 @@ export default {
   label,
   name,
   drag: true,
-  rule() {
+  rule(): ITableRule {
     return {
       class: 'group-table',
       realType: 'group-table',
@@ -19,7 +20,7 @@ export default {
       children: []
     }
   },
-  props() {
+  props(): ITableProps[] {
     return [
       {
         type: 'input',

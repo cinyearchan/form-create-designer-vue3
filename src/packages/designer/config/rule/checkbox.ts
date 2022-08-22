@@ -1,5 +1,6 @@
 import uniqueId from '@form-create/utils/lib/unique.js'
 import { makeOptionsRule, makeRequiredRule } from '../../utils/index'
+import { ICheckboxProps, ICheckboxRule } from '../../types/config/index'
 
 const label = '多选框'
 const name = 'checkbox'
@@ -8,7 +9,7 @@ export default {
   icon: 'icon-checkbox',
   label,
   name,
-  rule() {
+  rule(): ICheckboxRule {
     return {
       type: name,
       field: uniqueId(),
@@ -25,7 +26,7 @@ export default {
       ]
     }
   },
-  props() {
+  props(): ICheckboxProps[] {
     return [
       makeRequiredRule(),
       makeOptionsRule('options'),

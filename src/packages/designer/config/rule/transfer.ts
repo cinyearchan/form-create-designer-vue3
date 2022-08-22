@@ -1,4 +1,5 @@
 import uniqueId from '@form-create/utils/lib/unique.js'
+import { ITransferProps, ITransferRule } from '../../types/config/index'
 
 const label = '穿梭框'
 const name = 'el-transfer'
@@ -19,7 +20,7 @@ export default {
   icon: 'icon-transfer',
   label,
   name,
-  rule() {
+  rule(): ITransferRule {
     return {
       type: name,
       field: uniqueId(),
@@ -30,7 +31,7 @@ export default {
       }
     }
   },
-  props() {
+  props(): ITransferProps[] {
     return [
       {
         type: 'Struct',
