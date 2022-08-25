@@ -174,7 +174,7 @@ import { lower } from '@form-create/utils/lib/tocase.js'
 import ruleList from '../config/rule'
 import createMenu from '../config/menu'
 import { upper } from '../utils/index'
-import formCreate from '@form-create/element-ui'
+import formCreate, { FormRule } from '@form-create/element-ui'
 import draggable from 'vuedraggable/src/vuedraggable'
 import uniqueId from '@form-create/utils/lib/unique.js'
 import * as CodeMirror from 'codemirror/lib/codemirror.js'
@@ -182,7 +182,11 @@ import 'codemirror/lib/codemirror.css'
 import 'codemirror/mode/javascript/javascript.js'
 
 import { IOn } from '../types/index'
-import { Api, Rule, Options } from '@form-create/element-ui'
+import { Api, Rule, Options, maker } from '@form-create/element-ui'
+import { ICreatedMenu } from '../types/config/index'
+import col from '../config/rule/col'
+
+type ChildrenType = Rule | string | typeof maker
 
 export default defineComponent({
   name: 'FcDesigner',
@@ -209,12 +213,12 @@ export default defineComponent({
       added = ref(),
       activeTab = ref('form'),
       activeRule = ref(),
-      children = ref<Array<Rule | string>>([]),
+      children = ref<Array<ChildrenType>>([]),
       menuList = ref(menu.value || createMenu()),
       showBaseRule = ref(false),
       dragForm = ref<{
-        rule: Rule[]
-        api: object
+        rule: any
+        api: any
       }>({
         rule: [],
         api: {}
@@ -256,7 +260,12 @@ export default defineComponent({
           | string
           | number
           | boolean
-          | { field: string; type: string; title: string; _control: string }
+          | ({
+              field: string
+              type?: string
+              title: string
+              _control: string
+            } & { info?: any })
         options: {
           form: {
             labelPosition: string
@@ -305,7 +314,7 @@ export default defineComponent({
       }),
       propsFormMap = ref<{ [key: string]: Rule }>({}),
       propsForm = ref<{
-        rule: Rule[]
+        rule: any
         api: object
         value: unknown
         options: {
@@ -334,7 +343,11 @@ export default defineComponent({
         }
       })
 
-    const modal = ref({
+    const modal = ref<{
+        show: boolean
+        addShow: boolean
+        data: any
+      }>({
         show: false,
         addShow: false,
         data: null
@@ -372,10 +385,11 @@ export default defineComponent({
       }
       return { root: parent, parent: rule }
     }
+    // 创建拖拽的盒子
     const makeDrag = (
       group: boolean,
       tag: string,
-      children: unknown[],
+      children: Array<ChildrenType>,
       on: IOn
     ) => {
       return {
@@ -406,7 +420,8 @@ export default defineComponent({
         on
       }
     }
-    const makeDragRule = (children: unknown[]) => {
+    // 创建拖拽组件的生成规则
+    const makeDragRule = (children: Array<ChildrenType>) => {
       return [
         makeDrag(true, 'draggable', children, {
           add: (inject, evt) => dragAdd(children, evt),
@@ -416,7 +431,8 @@ export default defineComponent({
         })
       ]
     }
-    const dragAdd = (children: unknown[], evt: any) => {
+    // 拖拽增加的事件处理函数
+    const dragAdd = (children: Array<ChildrenType>, evt: any) => {
       const newIndex = evt.newIndex
       const menu = evt.item._underlying_vm_
       if (menu && menu.name) {
@@ -430,8 +446,9 @@ export default defineComponent({
       }
       added.value = true
     }
+    // 拖拽结束的事件处理函数
     const dragEnd = (
-      children: unknown[],
+      children: Array<ChildrenType>,
       { newIndex, oldIndex }: { newIndex: number; oldIndex: number }
     ) => {
       // console.log('end', newIndex, oldIndex)
@@ -446,16 +463,19 @@ export default defineComponent({
       addRule.value = null
       added.value = false
     }
-    const dragStart = (children: unknown[], evt: any) => {
+    // 拖拽开始的事件处理函数，会记录当前拖拽组件的生成规则
+    const dragStart = (children: Array<ChildrenType>, evt: any) => {
       moveRule.value = children
       added.value = false
     }
-    const dragUnchoose = (children: unknown[], evt: any) => {
+    // 拖拽取消的事件处理函数
+    const dragUnchoose = (children: Array<ChildrenType>, evt: any) => {
       addRule.value = {
         children,
         oldIndex: evt.oldIndex
       }
     }
+    // 响应组件的聚焦，dragTool 高亮
     const toolActive = (rule: Rule) => {
       nextTick(() => {
         activeTab.value = 'props'
@@ -492,9 +512,9 @@ export default defineComponent({
 
       if (showBaseRule.value) {
         baseForm.value.value = {
-          field: rule.field,
-          title: rule.title,
-          info: rule.info,
+          field: rule.field as string,
+          title: rule.title as string,
+          info: rule.info as any,
           _control: rule._control
         }
 
@@ -503,7 +523,9 @@ export default defineComponent({
         }
       }
     }
-    const makeRule = (config, _rule?: Rule | null) => {
+    const makeRule = (config: any, _rule?: Rule | null) => {
+      // 如果有第二个参数——组件生成规则，则直接获取规则
+      // 如果没有第二个参数，则从 config.rule() 组件配置中，获取生成规则
       const rule = _rule || config.rule()
       rule.config = { config }
       if (!rule.effect) rule.effect = {}
@@ -513,7 +535,7 @@ export default defineComponent({
       let drag
 
       if (config.drag) {
-        const children: unknown[] = []
+        const children: Array<ChildrenType> = []
         drag = makeDrag(config.drag, rule.type, children, {
           end: (inject, evt) => dragEnd(inject.self.children, evt),
           add: (inject, evt) => dragAdd(inject.self.children, evt),
@@ -541,11 +563,11 @@ export default defineComponent({
             },
             inject: true,
             on: {
-              delete: ({ self }) => {
+              delete: ({ self }: any) => {
                 getParent(self).parent.__fc__.rm()
                 clearActiveRule()
               },
-              addComponent: ({ self }) => {
+              addComponent: ({ self }: any) => {
                 const top = getParent(self)
                 top.root.children.splice(
                   top.root.children.indexOf(top.parent) + 1,
@@ -553,18 +575,16 @@ export default defineComponent({
                   makeRule(top.parent.config.config)
                 )
               },
-              addChild: ({ self }) => {
+              addChild: ({ self }: any) => {
                 const top = getParent(self)
                 const config = top.parent.config.config
                 const item = ruleList[config.children]
                 if (!item) return
-                ;(!config.drag
-                  ? top.parent
-                  : top.parent!.children![0]
+                ;(
+                  (!config.drag ? top.parent : top.parent!.children![0]) as any
                 ).children[0].children.push(makeRule(item))
               },
-              copy: n => {
-                const { self } = n
+              copy: ({ self }: any) => {
                 const top = getParent(self),
                   copyRule = formCreate.copyRule(top.parent)
                 if (copyRule.slot) {
@@ -576,7 +596,7 @@ export default defineComponent({
                   copyRule
                 )
               },
-              active: ({ self }) => {
+              active: ({ self }: any) => {
                 console.log('self1', self)
                 toolActive(getParent(self).parent)
               }
@@ -598,11 +618,11 @@ export default defineComponent({
           inject: true,
           slot: `slot-${rule.field ? rule.field : uniqueId()}`,
           on: {
-            delete: ({ self }) => {
+            delete: ({ self }: any) => {
               self.__fc__.rm()
               clearActiveRule()
             },
-            addComponent: ({ self }) => {
+            addComponent: ({ self }: any) => {
               const top = getParent(self)
               top.root.children.splice(
                 top.root.children.indexOf(top.parent) + 1,
@@ -610,7 +630,7 @@ export default defineComponent({
                 makeRule(self.children[0].config.config)
               )
             },
-            addChild: ({ self }) => {
+            addChild: ({ self }: any) => {
               const config = self.children[0].config.config
               const item = ruleList[config.children]
               if (!item) return
@@ -619,7 +639,7 @@ export default defineComponent({
                 : self.children[0]
               ).children[0].children.push(makeRule(item))
             },
-            copy: ({ self }) => {
+            copy: ({ self }: any) => {
               const top = getParent(self),
                 copyRule = formCreate.copyRule(top.parent)
               if (copyRule.slot) {
@@ -631,7 +651,7 @@ export default defineComponent({
                 copyRule
               )
             },
-            active: ({ self }) => {
+            active: ({ self }: any) => {
               console.log('self', self)
               toolActive(self.children[0])
             }
@@ -640,14 +660,16 @@ export default defineComponent({
         }
       }
     }
-    const loadRule = (rules: Array<Rule | string>) => {
-      const loadRuleValue: Array<Rule | string> = []
-      rules.forEach(rule => {
+    // 加载生成规则
+    const loadRule = (rules: Array<Rule | string | FormRule>) => {
+      const loadRuleValue: Array<Rule | string | FormRule> = []
+      rules.forEach((rule: any) => {
         if (is.String(rule as string) || typeof rule === 'string') {
           return loadRuleValue.push(rule)
         } else {
           const config =
-            ruleList[rule._fc_drag_tag] || ruleList[rule.type as string]
+            ruleList[(rule as any)._fc_drag_tag] ||
+            ruleList[rule.type as string]
           const _children = rule.children
           rule.children = []
           if (rule.control) {
@@ -660,7 +682,7 @@ export default defineComponent({
             if (_children) {
               let children = _children[0].children
 
-              if (config.drag) {
+              if ((config as typeof col).drag) {
                 children = children[0].children
               }
               children.push(...loadRule(_children as Rule[]))
@@ -722,7 +744,7 @@ export default defineComponent({
     const baseChange = (
       field: string,
       value: string | number | boolean,
-      _,
+      _: any,
       fapi: Api,
       flag: boolean
     ) => {
@@ -730,7 +752,7 @@ export default defineComponent({
         activeRule.value[field] = value
       }
     }
-    const propRemoveField = (field: string, _, fapi: Api) => {
+    const propRemoveField = (field: string, _: any, fapi: Api) => {
       if (activeRule.value && fapi.activeRule === activeRule.value) {
         dragForm.value.api.sync(activeRule.value)
         if (field.indexOf('formCreate') === 0) {
@@ -754,7 +776,7 @@ export default defineComponent({
     const propChange = (
       field: string,
       value: string | number | boolean,
-      _,
+      _: any,
       fapi: Api,
       flag: boolean
     ) => {
@@ -787,7 +809,7 @@ export default defineComponent({
     const validateChange = (
       field: string,
       value: string | number | boolean,
-      _,
+      _: any,
       fapi: Api,
       flag: boolean
     ) => {
@@ -798,7 +820,7 @@ export default defineComponent({
     const addMenu = (config: { name: string; list: any }) => {
       if (!config.name || !config.list) return
       let flag = true
-      menuList.value.forEach((v, i: number) => {
+      menuList.value.forEach((v: any, i: number) => {
         if (v.name === config.name) {
           v.list = [].concat(v.list, config.list)
           flag = false
@@ -815,22 +837,22 @@ export default defineComponent({
         }
       })
     }
-    const setMenuItem = (name: string, list) => {
-      menuList.value.forEach(v => {
+    const setMenuItem = (name: string, list: any) => {
+      menuList.value.forEach((v: any) => {
         if (v.name === name) {
           v.list = list
         }
       })
     }
-    const appendMenuItem = (name: string, item) => {
-      menuList.value.forEach(v => {
+    const appendMenuItem = (name: string, item: any) => {
+      menuList.value.forEach((v: any) => {
         if (v.name === name) {
           v.list.push(item)
         }
       })
     }
-    const removeMenuItem = item => {
-      menuList.value.forEach(v => {
+    const removeMenuItem = (item: any) => {
+      menuList.value.forEach((v: any) => {
         let idx
         if (is.String(item)) {
           ;[...v.list].forEach((menu, idx) => {
@@ -845,7 +867,9 @@ export default defineComponent({
         }
       })
     }
-    const addComponent = data => {
+
+    // 响应 DragTool 中的 加号——添加组件
+    const addComponent = (data: any) => {
       if (Array.isArray(data)) {
         data.forEach(v => {
           ruleList[v.name] = v
@@ -854,9 +878,13 @@ export default defineComponent({
         ruleList[data.name] = data
       }
     }
+
+    // 获取当前操作区中 form 表单的 rule 生成规则
     const getRule = () => {
       return parseRule(deepCopy(dragForm.value.api.rule[0].children))
     }
+
+    // 将当前操作区中 form 表单的 rule 生成规则格式化成 json
     const getJson = () => {
       return formCreate.toJson(getRule())
     }
@@ -865,35 +893,42 @@ export default defineComponent({
       delete option.submitBtn
       return option
     }
-    const setRule = (rules, flag?: boolean) => {
+    const setRule = (rules: Array<Rule | string>, flag?: boolean) => {
+      console.log('rules', rules, typeof rules)
       children.value = loadRule(
-        is.String(rules) ? formCreate.parseJson(rules) : rules
-      )
+        is.String(rules) ? formCreate.parseJson(rules as any as string) : rules
+      ) as any
       clearActiveRule()
-      dragForm.value.rule = makeDragRule(children.value)
+      dragForm.value.rule = makeDragRule(children.value as any)
     }
+
+    // 移除当前激活的规则
     const clearActiveRule = () => {
       activeRule.value = null
       activeTab.value = 'form'
     }
-    const setOption = (option: Options) => {
+    const setOption = (option: any) => {
       const _ = option
       _.submitBtn = false
       delete _.resetBtn
       form.value.value = _
     }
+    // 预览按钮
     const viewer = () => {
       // 预览
       modal.value.show = true
       previewDialogForm.value.rule = getRule()
     }
+    // 清空按钮
     const clear = () => {
       setRule([])
     }
-    const getResult = formData => {
+    // 预览弹窗里表单组件的提交事件的处理函数
+    const getResult = (formData: any) => {
       // 预览提交
       console.log('result:', formData)
     }
+    // 添加默认值规则弹窗的确认添加按钮被点击
     const addRuleRule = () => {
       // 添加规则
       try {
@@ -904,6 +939,7 @@ export default defineComponent({
         console.error(e)
       }
     }
+    // 添加默认值按钮被点击
     const onAddValue = () => {
       // 添加默认值 弹出框
       modal.value.addShow = true
@@ -913,6 +949,7 @@ export default defineComponent({
       })
     }
 
+    // 加载 codeMirror
     const loadCMirror = () => {
       // 加载编辑器
       cMirror.value = CodeMirror(editorRef.value, {
@@ -927,6 +964,7 @@ export default defineComponent({
       })
     }
 
+    // 获取 codeMirror 的内容
     const getMirrorValue = () => {
       // 编辑器结果 结合formCreate处理规则json
       let data = null
@@ -940,7 +978,9 @@ export default defineComponent({
       return data
     }
 
-    dragForm.value.rule = makeDragRule(children.value)
+    // 初始化数据
+    // 中央操作区的表单变量
+    dragForm.value.rule = makeDragRule(children.value as any)
     form.value.rule = configForm()
     baseForm.value.rule = field()
     validateForm.value.rule = validate()

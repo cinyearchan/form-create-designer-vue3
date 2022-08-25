@@ -19,8 +19,9 @@ import span from './rule/span'
 import space from './rule/space'
 import button from './rule/button'
 // import editor from './rule/editor'
+import { ICreatedMenu } from '../types/config/index'
 
-export default function createMenu() {
+export default function createMenu(): ICreatedMenu[] {
   return [
     {
       name: 'main',

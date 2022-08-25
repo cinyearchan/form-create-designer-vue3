@@ -11,10 +11,7 @@ export interface IBaseForm {
   field: string
   value: string | boolean
   title: string
-  options?: Array<{
-    value: string
-    label: string
-  }>
+  options?: Array<IOriginOptions>
 }
 
 export interface IBaseValidate {
@@ -524,4 +521,78 @@ export interface IUploadProps extends IOriginProps {
   props?: {
     defaultValue: object
   }
+}
+
+export type IPresetRule =
+  | IAlertRule
+  | IButtonRule
+  | ICardRule
+  | ICascaderRule
+  | ICheckboxRule
+  | IColRule
+  | IColorRule
+  | IDateRule
+  | IDividerRule
+  | IEditorRule
+  | IHiddenRule
+  | IInputRule
+  | INumberRule
+  | IProgressRule
+  | IRadioRule
+  | IRateRule
+  | IRowRule
+  | ISelectRule
+  | ISliderRule
+  | ISpaceRule
+  | ISpanRule
+  | ISwitchRule
+  | ITabRule
+  | ITabPaneRule
+  | ITimeRule
+  | ITransferRule
+  | ITreeRule
+  | IUploadRule
+
+export type IPresetProps =
+  | IAlertProps
+  | IButtonProps
+  | ICardProps
+  | ICascaderProps
+  | ICheckboxProps
+  | IColProps
+  | IColorProps
+  | IDateProps
+  | IDividerProps
+  | IEditorProps
+  | IHiddenProps
+  | IInputProps
+  | INumberProps
+  | IProgressProps
+  | IRadioProps
+  | IRateProps
+  | IRowProps
+  | ISelectProps
+  | ISliderProps
+  | ISpaceProps
+  | ISpanProps
+  | ISwitchProps
+  | ITabProps
+  | ITabPaneProps
+  | ITimeProps
+  | ITransferProps
+  | ITreeProps
+  | IUploadProps
+
+interface IComponentRule {
+  icon: string
+  label: string
+  name: string
+  rule(): IPresetRule
+  props(): Array<IPresetProps>
+}
+
+export type ICreatedMenu = {
+  name: string
+  title: string
+  list: Array<IComponentRule>
 }
